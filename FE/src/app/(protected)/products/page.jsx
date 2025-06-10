@@ -8,12 +8,29 @@ import { getProducts } from "../../services/productService";
 import { buildGetProductQuery } from "../../lib/utils/queryBuilder";
 import { upsertProduct,deleteProduct } from "../../services/productService";
 import { ModalContext } from "../../context/modelContext";
+import { FilterMatchMode } from "primereact/api";
+
 const Products = () => {
   const { showToast,toggleModal,modalContentType } = useContext(ModalContext);
 
   const [products, setProducts] = useState([]);
-  const [filters, setFilters] = useState({});
-  const [sort, setSort] = useState({ field: null, order: null });
+  const [filters, setFilters] = useState(() => {
+  const savedFilters = localStorage.getItem("productFilters");
+  return savedFilters
+    ? JSON.parse(savedFilters)
+    : {
+        global: { value: null },
+        name: { value: null },
+        category: { value: null, matchMode: FilterMatchMode.IN },
+        status: { value: null },
+        verified: { value: null },
+      };
+});
+
+const [sort, setSort] = useState(() => {
+  const savedSort = localStorage.getItem("productSort");
+  return savedSort ? JSON.parse(savedSort) : { field: null, order: null };
+});
   const [defaultValue, setDefaultValue] = useState({});
 
   const renderContent = () => {
@@ -145,27 +162,33 @@ const Products = () => {
   };
   const handleFilterchange = ({ key, value }) => {
     setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    ...prev,
+    [key]: {
+      ...prev[key],
+      value: value,
+    },
+  }));
   };
   const handleSortChange = (sort) => {
-    console.log("Sort changed:", sort);
     setSort(sort);
   };
   useEffect(() => {
-    const { search, ...fieldFilters } = filters;
-    const query = buildGetProductQuery({
-      search: search || "",
-      sort: sort,
-      pagination: { page: 1, limit: 10 },
-      filters: fieldFilters,
-    });
-    fetchProducts(query);
-  }, [filters, sort]);
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const fieldFilters = Object.fromEntries(
+    Object.entries(filters).map(([key, obj]) => [key, obj?.value ?? null])
+  );
+
+  const query = buildGetProductQuery({
+    search: filters?.global?.value || "",
+    sort,
+    pagination: { page: 1, limit: 10 },
+    filters: fieldFilters,
+  });
+  localStorage.setItem("productFilters", JSON.stringify(filters));
+  localStorage.setItem("productSort", JSON.stringify(sort));
+  fetchProducts(query);
+
+}, [filters, sort]);
+
   return (
     <div className=" h-full">
       <Header />
@@ -173,6 +196,7 @@ const Products = () => {
         value={products}
         searchOn={searchOn}
         columns={columns}
+        filters={filters}
         onActionEdit={handleEdit}
         onFilterChange={handleFilterchange}
         onSortChange={handleSortChange}

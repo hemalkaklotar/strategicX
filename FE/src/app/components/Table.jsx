@@ -24,17 +24,17 @@ export default function Table({
   onActionEdit,
   onActionDelete,
   onFilterChange,
-  onSortChange
+  onSortChange,filters
 }) {
   const { openModalWith } = useContext(ModalContext);
-  const debouncedSearch = useRef(debounce(onFilterChange, 300)).current;
-  const [filters] = useState({
-    global: { value: null },
-    name: { value: null },
-    category: { value: null, matchMode: FilterMatchMode.IN },
-    status: { value: null },
-    verified: { value: null },
-  });
+  const debouncedSearch = useRef(debounce(onFilterChange, 400)).current;
+  // const [filters] = useState({
+  //   global: { value: null },
+  //   name: { value: null },
+  //   category: { value: null, matchMode: FilterMatchMode.IN },
+  //   status: { value: null },
+  //   verified: { value: null },
+  // });
   const [sort, setSort] = useState({ field: null, order: null });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [representatives] = useState([
@@ -68,9 +68,10 @@ export default function Table({
   const renderHeader = () => {
     return (
       <div className="flex justify-content-end">
+        {}
         <Input
           icon="search"
-          value={globalFilterValue}
+          value={globalFilterValue || filters.search.value}
           onChange={onGlobalFilterChange}
           placeholder="Keyword Search"
         />
@@ -158,11 +159,13 @@ export default function Table({
         value={options.value}
         options={statuses}
         onChange={(e) => {
-          options.filterApplyCallback(e.value)
           debouncedSearch({
             key: options.field,
             value: e.value,
-          })}
+          })
+          options.filterApplyCallback(e.value)
+        
+        }
         }
         itemTemplate={statusItemTemplate}
         placeholder="Select One"

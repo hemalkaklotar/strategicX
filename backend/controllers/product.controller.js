@@ -1,7 +1,6 @@
 const Product = require('../models/product.model');
 const { Op } = require('sequelize');
 
-
 exports.getAllProducts = async (req, res) => {
   try {
     const {
@@ -19,10 +18,12 @@ exports.getAllProducts = async (req, res) => {
       status,
     } = req.query;
 
-    const offset = (page - 1) * limit;
+    const parsedLimit = parseInt(limit);
+    const parsedPage = parseInt(page);
+    const offset = (parsedPage - 1) * parsedLimit;
 
     const where = {
-      createdBy: req.user.id,  
+      createdBy: req.user.id,
     };
 
     if (search) {
@@ -41,30 +42,38 @@ exports.getAllProducts = async (req, res) => {
 
     if (name) where.name = { [Op.like]: `%${name}%` };
     if (description) where.description = { [Op.like]: `%${description}%` };
-    if (Array.isArray(category) && category.length > 0) {
-      where[Op.or] = category.map((cat) => ({
-        category: { [Op.like]: `%${cat}%` }
-      }));
+
+    // Fix: Convert comma-separated string to array
+    const categoryArray = typeof category === 'string' ? category.split(',') : [];
+
+    if (categoryArray.length > 0) {
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push({
+        [Op.or]: categoryArray.map((cat) => ({
+          category: { [Op.like]: `%${cat.trim()}%` },
+        })),
+      });
     }
+
     if (status) where.status = status;
-    if (price) where.price = { [Op.like]: `%${price}%` };
-    if (quantity) where.quantity = { [Op.like]: `%${quantity}%` };
-    if (warranty) where.warranty = { [Op.like]: `%${warranty}%` };
+    if (price) where.price = price;
+    if (quantity) where.quantity = quantity;
+    if (warranty) where.warranty = warranty;
 
     const { rows: products, count: total } = await Product.findAndCountAll({
       where,
       order: [[sortBy, sortOrder]],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      limit: parsedLimit,
+      offset,
     });
 
     res.json({
       data: products,
       pagination: {
         total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        totalPages: Math.ceil(total / limit),
+        page: parsedPage,
+        limit: parsedLimit,
+        totalPages: Math.ceil(total / parsedLimit),
       },
     });
 
@@ -72,9 +81,6 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
 
 exports.upsertProduct = async (req, res) => {
   try {

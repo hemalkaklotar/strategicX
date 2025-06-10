@@ -1,3 +1,7 @@
 
 /backend/node_modules/
 /FE/node_modules/
+FE/.next/
+/FE/build/
+/FE/dist/
+/.DS_Store                    
