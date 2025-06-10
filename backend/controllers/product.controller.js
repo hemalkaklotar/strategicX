@@ -92,21 +92,25 @@ exports.upsertProduct = async (req, res) => {
     const file = req.file;
     const imageBuffer = file ? file.buffer : null;
 
+    const parsedPrice = parseFloat(price);
+    const parsedQuantity = parseInt(quantity);
+    const parsedWarranty = parseInt(warranty) || 0;
+
     let product;
     let message;
 
-    if (id) {
+    if (id && id !== 'undefined') {
       product = await Product.findByPk(id);
 
       if (product) {
         await product.update({
           name,
           description,
-          price,
+          price: parsedPrice,
           category,
           status,
-          quantity,
-          warranty,
+          quantity: parsedQuantity,
+          warranty: parsedWarranty,
           image: imageBuffer ?? product.image,
           createdBy: req.user.id,
         });
@@ -114,14 +118,14 @@ exports.upsertProduct = async (req, res) => {
         message = "Product updated successfully.";
       } else {
         product = await Product.create({
-          id, 
+          id,
           name,
           description,
-          price,
+          price: parsedPrice,
           category,
           status,
-          quantity,
-          warranty,
+          quantity: parsedQuantity,
+          warranty: parsedWarranty,
           image: imageBuffer,
           createdBy: req.user.id,
         });
@@ -132,11 +136,11 @@ exports.upsertProduct = async (req, res) => {
       product = await Product.create({
         name,
         description,
-        price,
+        price: parsedPrice,
         category,
         status,
-        quantity,
-        warranty,
+        quantity: parsedQuantity,
+        warranty: parsedWarranty,
         image: imageBuffer,
         createdBy: req.user.id,
       });
@@ -150,6 +154,7 @@ exports.upsertProduct = async (req, res) => {
     res.status(500).json({ error: "Failed to upsert product: " + err.message });
   }
 };
+
 
 
 
