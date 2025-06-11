@@ -28,15 +28,7 @@ export default function Table({
 }) {
   const { openModalWith } = useContext(ModalContext);
   const debouncedSearch = useRef(debounce(onFilterChange, 400)).current;
-  // const [filters] = useState({
-  //   global: { value: null },
-  //   name: { value: null },
-  //   category: { value: null, matchMode: FilterMatchMode.IN },
-  //   status: { value: null },
-  //   verified: { value: null },
-  // });
   const [sort, setSort] = useState({ field: null, order: null });
-  const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [representatives] = useState([
     { name: "Electronics", value: "electronics" },
     { name: "Clothing", value: "clothing" },
@@ -60,24 +52,8 @@ export default function Table({
     }
   };
 
-  const onGlobalFilterChange = (e) => {
-    const value = e.target.value;
-    setGlobalFilterValue(value);
-    debouncedSearch({ key: "search", value: value });
-  };
-  const renderHeader = () => {
-    return (
-      <div className="flex justify-content-end">
-        {}
-        <Input
-          icon="search"
-          value={globalFilterValue || filters?.search?.value}
-          onChange={onGlobalFilterChange}
-          placeholder="Keyword Search"
-        />
-      </div>
-    );
-  };
+ 
+ 
   const representativesItemTemplate = (option) => {
     return (
       <div className="flex align-items-center gap-2">
@@ -222,11 +198,10 @@ export default function Table({
         filterDisplay="row"
         scrollable
         scrollHeight="400px"
-        header={renderHeader}
         onSort={onSort}
      sortField={sort.field}
       sortOrder={sort.order}
-        emptyMessage="No customers found."
+        emptyMessage="No products found."
       >
         {columns &&
           columns.map((col, index) => (

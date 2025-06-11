@@ -33,7 +33,6 @@ const statusOptions = [
   { label: "Unavailable", value: "unavailable" },
 ];
 const AddEditProductForm = ({ defaultValues,onProductSubmit }) => {
-  console.log("Default Values:", defaultValues);
   const onSubmit = (data) => {
    const formData = new FormData();
    console.log("Form Data:", data);

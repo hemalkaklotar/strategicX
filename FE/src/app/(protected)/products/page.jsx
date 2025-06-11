@@ -36,6 +36,14 @@ const [sort, setSort] = useState(() => {
   const renderContent = () => {
     switch (modalContentType) {
       case "add":
+        return(
+
+        <AddEditProductForm
+            defaultValues={{}}
+            onProductSubmit={handleProductSubmit}
+          />
+        )
+
       case "edit":
         return (
           <AddEditProductForm
@@ -121,7 +129,6 @@ const [sort, setSort] = useState(() => {
     },
   ];
   const handleEdit = (rowData) => {
-    console.log("Edit row data:", rowData);
     setDefaultValue(rowData);
   };
   const handleDelete = (id) => {
