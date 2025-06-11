@@ -186,6 +186,7 @@ const [sort, setSort] = useState(() => {
   localStorage.setItem("productFilters", JSON.stringify(filters));
   localStorage.setItem("productSort", JSON.stringify(sort));
   fetchProducts(query);
+  
 
 }, [filters, sort]);
 

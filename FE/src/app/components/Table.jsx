@@ -71,7 +71,7 @@ export default function Table({
         {}
         <Input
           icon="search"
-          value={globalFilterValue || filters.search.value}
+          value={globalFilterValue || filters?.search?.value}
           onChange={onGlobalFilterChange}
           placeholder="Keyword Search"
         />
